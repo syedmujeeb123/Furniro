@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "../index.css";
 
 // Import components
@@ -12,20 +12,39 @@ import Customer from "./customer";
 import Footer from "./footer";
 import CartPage from "./cartPage";
 import Touch from "./touch";
+import WishlistPage from "./WishlistPage";
+import ProductDetails from "./productDetails";
 
 export default function App() {
   const [breadcrumb, setBreadcrumb] = useState("Home");
   const [cartCount, setCartCount] = useState(0);
-  const [currentView, setCurrentView] = useState("cart"); // Initialize with the Cart view
-  const [cartItems, setCartItems] = useState([]); // State to hold cart items
+  const [currentView, setCurrentView] = useState(() => {
+    return localStorage.getItem("currentView") || "cart";
+  });
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+  });
+
+  const [cartItems, setCartItems] = useState(() => {
+    const storedCart = localStorage.getItem("cartItems");
+    try {
+      const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+      return Array.isArray(parsedCart) ? parsedCart : []; // ✅ Ensure it's an array
+    } catch (error) {
+      console.error("Error parsing cartItems from localStorage:", error);
+      return [];
+    }
+  });
 
   const handleNavClick = (view) => {
     console.log(`Switching to ${view}`); // Debugging statement
     setCurrentView(view);
   };
 
-  const addToCart = (product) => {
+  const addToCart = (product, position = null) => {
     setCartItems((prevItems) => {
+      if (!Array.isArray(prevItems)) return []; // ✅ Ensure prevItems is always an array
       const existingItem = prevItems.find((item) => item.id === product.id);
       if (existingItem) {
         return prevItems.map((item) =>
@@ -34,42 +53,97 @@ export default function App() {
             : item
         );
       }
-      // Add new item with correct image
       return [...prevItems, { ...product, quantity: 1 }];
     });
+
+    // ✅ Add position to notification
+    setNotification({
+      show: true,
+      message: `${product.name || "Item"} added to cart!`,
+      position,
+    });
+
+    // ✅ Add position to notification
+    setNotification({
+      show: true,
+      message: `${product.name || "Item"} added to cart!`,
+      position,
+    });
+
+    setTimeout(() => {
+      setNotification({ show: false, message: "", position: null });
+    }, 3000);
   };
+
+  useEffect(() => {
+    localStorage.setItem("currentView", currentView);
+  }, [currentView]);
+
+  useEffect(() => {
+    if (Array.isArray(cartItems)) {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    }
+  }, [cartItems]);
+
+  useEffect(() => {
+    if (!Array.isArray(cartItems)) {
+      setCartItems([]); // ✅ Ensure cartItems is an array
+      return;
+    }
+    const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+    setCartCount(count);
+  }, [cartItems]);
 
   return (
     <Router>
-      <div className="card-container">
-        <Navbar
-          onNavClick={handleNavClick}
-          setBreadcrumb={setBreadcrumb}
-          setCartCount={setCartCount}
+      <Navbar
+        onNavClick={handleNavClick}
+        setBreadcrumb={setBreadcrumb}
+        setCartCount={setCartCount}
+        cartCount={cartCount}
+        setCurrentView={setCurrentView}
+      />
+      {currentView === "cart" && <Background breadcrumb={breadcrumb} />}
+
+      {notification.show && notification.position && (
+        <div
+          className="absolute bg-green-500 text-white p-2 px-4 rounded-md shadow-md z-50 text-sm animate-fade-in"
+          style={{
+            top: `${notification.position.top + 90}px`,
+            left: `${notification.position.left}px`,
+          }}
+        >
+          {notification.message}
+        </div>
+      )}
+
+      <Routes>
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route
+          path="/cartPage"
+          element={
+            <CartPage cartItems={cartItems} setCartItems={setCartItems} />
+          }
         />
-        <Background breadcrumb={breadcrumb} />
+        <Route path="/contact" element={<Touch />} />
+        <Route
+          path="/product/:id"
+          element={<ProductDetails addToCart={addToCart} />}
+        />
+        <Route
+          path="/"
+          element={
+            <>
+              <Header cartCount={cartCount} />
+              <Cart setCartCount={setCartCount} addToCart={addToCart} />
+              <Customer /> {/* 👈 now part of the homepage */}
+            </>
+          }
+        />
+      </Routes>
 
-        {/* Render components based on currentView state */}
-        {currentView === "cart" && (
-          <>
-            <Header cartCount={cartCount} />
-            <Cart setCartCount={setCartCount} addToCart={addToCart} />
-            <Buttons />
-          </>
-        )}
-
-        {/* Render CartPage when currentView is "cartPage" */}
-        {currentView === "cartPage" && (
-          <CartPage cartItems={cartItems} setCartItems={setCartItems} /> // Pass cartItems as a prop
-        )}
-
-        {currentView === "contact" && (
-          <Touch /> // Contact page component
-        )}
-
-        <Customer />
-        <Footer />
-      </div>
+      {currentView === "Home" && <Customer />}
+      <Footer />
     </Router>
   );
 }
