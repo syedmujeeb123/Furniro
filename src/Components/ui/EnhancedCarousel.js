@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import GirlOne from "../Images/g-1.png";
 import GirlTwo from "../Images/girl-2.png";
 import GirlThree from "../Images/shopping-1.jpg";
-import GirlFour from "../Images/shopping-2.jpg";
+// import GirlFour from "../Images/shopping-2.jpg";
 
 const carouselItems = [
   {
@@ -85,8 +85,8 @@ const EnhancedCarousel = () => {
             }`}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-              {/* Text content */}
-              <div className="flex flex-col justify-center px-4 sm:px-6 md:px-16 z-20">
+              {/* Text content - Updated with more right padding and adjusted alignment */}
+              <div className="flex flex-col justify-center pl-8 pr-4 sm:pl-12 sm:pr-6 md:pl-24 md:pr-8 lg:pl-32 z-20">
                 <span className="text-xs sm:text-sm md:text-base text-indigo-600 font-medium mb-2">
                   {item.tagline}
                 </span>
@@ -97,7 +97,7 @@ const EnhancedCarousel = () => {
                   {item.description}
                 </p>
                 <div>
-                  <button className="px-6 py-2 sm:px-8 sm:py-3 bg-black text-white text-sm sm:text-base font-medium shadow-lghover:bg-white hover:text-black hover:font-bold transform hover:scale-105 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] delay-100">
+                  <button className="px-6 py-2 sm:px-8 sm:py-3 bg-black text-white text-sm sm:text-base font-medium shadow-lg hover:bg-white hover:text-black hover:font-bold transform hover:scale-105 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] delay-100">
                     {item.actionText}
                   </button>
                 </div>

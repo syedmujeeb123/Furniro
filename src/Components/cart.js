@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Discount_30 from "./Images/discount30.svg";
 import Share from "./Images/share.svg";
+
 // import Compare from "./Images/compare.svg";
 import Like from "./Images/like.svg";
-// import Eye from "./Images/eye.gif";
 import { Eye } from "lucide-react";
 import Discount_50 from "./Images/discount50.svg";
 import New from "./Images/New.svg";
@@ -114,6 +114,7 @@ const CartItem = ({
   price,
   addToCart,
   index,
+  isOutOfStock, // Added isOutOfStock prop
 }) => {
   const { wishlist, addToWishlist, removeFromWishlist } =
     useContext(WishlistContext);
@@ -122,7 +123,9 @@ const CartItem = ({
   const [activeSlide, setActiveSlide] = useState(0); // Define activeSlide state
   const [quantity, setQuantity] = useState(1); // Define quantity state
   const [cartFeedback, setCartFeedback] = useState(false); // Define cartFeedback state
-  const [wishlistFeedback, setWishlistFeedback] = useState(false); // Define wishlistFeedback state
+  const [wishlistFeedback, setWishlistFeedback] = useState(false); // Define wishlistFeedback
+  const [showZoom, setShowZoom] = useState(false);
+  const [zoomSlide, setZoomSlide] = useState(0);
 
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
@@ -160,19 +163,22 @@ const CartItem = ({
   // Handler for viewing product details
   const handleViewProduct = () => {
     navigate(`/product/${id}`, {
-      state: { id, img, name, description, price },
+      state: { id, img, name, description, price, isOutOfStock },
     });
   };
 
   // Handler for adding to cart
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const position = {
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX,
-    };
-    addToCart({ id, image: img, name: name, price }, position);
+    // Only add to cart if item is in stock
+    if (!isOutOfStock) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const position = {
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+      };
+      addToCart({ id, image: img, name: name, price }, position);
+    }
   };
 
   // Added quick view handler
@@ -234,12 +240,22 @@ const CartItem = ({
           className="flex justify-end items-center flex-col gap-4 text-center absolute inset-0 opacity-0 transition-all ease-in-out duration-500 group-hover:opacity-100 hover:-mb-20 -mb-4"
           style={{ zIndex: 3 }}
         >
-          <button
-            className="px-8 py-2 bg-custom-pink hover:bg-black text-white font-semibold rounded-full"
-            onClick={handleAddToCart}
-          >
-            Add to Cart
-          </button>
+          {/* Show "Out of Stock" or "Add to Cart" button based on stock status */}
+          {isOutOfStock ? (
+            <button
+              className="px-8 py-2 bg-red-600 text-white font-semibold rounded-full cursor-not-allowed"
+              disabled
+            >
+              Out of Stock
+            </button>
+          ) : (
+            <button
+              className="px-8 py-2 bg-custom-pink hover:bg-black text-white font-semibold rounded-full"
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </button>
+          )}
           <div className="flex gap-[1px] items-center rounded-md group hover:text-black">
             {/* Icon 1 - Left */}
             <div className="opacity-0 px-2 py-1 rounded-l-md bg-custom-pink hover:bg-black group-hover:opacity-100 transition-opacity duration-500 delay-[700ms]">
@@ -270,7 +286,7 @@ const CartItem = ({
                 className={`${isWishlisted ? "filter-red" : ""}`}
               />
             </div>
-          </div>{" "}
+          </div>
         </div>
       </div>
 
@@ -336,29 +352,104 @@ const CartItem = ({
                 <div className="relative">
                   <div className="overflow-hidden ">
                     <div
-                      className="flex transition-transform duration-300 ease-in-out "
+                      className="flex transition-transform duration-300 ease-in-out"
                       style={{
                         transform: `translateX(-${activeSlide * 100}%)`,
                       }}
                     >
                       {/* Main product image */}
-                      <div className="w-full flex-shrink-0">
+                      <div className="w-full flex-shrink-0 relative">
                         <img src={img} alt={name} className="w-full" />
+                        <button
+                          className="absolute top-2 right-2 bg-white bg-opacity-70 p-1 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowZoom(true);
+                            setZoomSlide(activeSlide);
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <polyline points="9 21 3 21 3 15"></polyline>
+                            <line x1="21" y1="3" x2="14" y2="10"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
+                          </svg>
+                        </button>
                       </div>
                       {/* Additional product images - assuming you have these in an array */}
-                      <div className="w-full flex-shrink-0">
+                      <div className="w-full flex-shrink-0 relative">
                         <img
                           src={hoverImg}
                           alt={`${name} view 2`}
                           className="w-full"
                         />
+                        <button
+                          className="absolute top-2 right-2 bg-white bg-opacity-70 p-1 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowZoom(true);
+                            setZoomSlide(activeSlide);
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <polyline points="9 21 3 21 3 15"></polyline>
+                            <line x1="21" y1="3" x2="14" y2="10"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
+                          </svg>
+                        </button>
                       </div>
-                      <div className="w-full flex-shrink-0">
+                      <div className="w-full flex-shrink-0 relative">
                         <img
                           src={img}
                           alt={`${name} view 3`}
                           className="w-full"
                         />
+                        <button
+                          className="absolute top-2 right-2 bg-white bg-opacity-70 p-1 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowZoom(true);
+                            setZoomSlide(activeSlide);
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <polyline points="9 21 3 21 3 15"></polyline>
+                            <line x1="21" y1="3" x2="14" y2="10"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -412,9 +503,9 @@ const CartItem = ({
                 </div>
 
                 {/* Thumbnail Gallery */}
-                <div className="flex gap-2 overflow-x-auto justify-center  mt-2">
+                <div className="flex gap-2 overflow-x-auto justify-center mt-2">
                   <div
-                    className={`border-2  ${
+                    className={`border-2 ${
                       activeSlide === 0
                         ? "border-gray-800"
                         : "border-transparent"
@@ -537,33 +628,42 @@ const CartItem = ({
                   </div>
 
                   <div className="flex gap-2">
-                    <button
-                      className="bg-gray-800 text-white px-6 py-2 hover:bg-custom-pink transition-colors flex items-center gap-2 rounded-md"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(e);
-                        // Optional feedback
-                        setCartFeedback(true);
-                        setTimeout(() => setCartFeedback(false), 2000);
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    {isOutOfStock ? (
+                      <button
+                        className="bg-red-600 text-white px-6 py-2 rounded-md cursor-not-allowed"
+                        disabled
                       >
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                      </svg>
-                      ADD TO CART
-                    </button>
+                        OUT OF STOCK
+                      </button>
+                    ) : (
+                      <button
+                        className="bg-gray-800 text-white px-6 py-2 hover:bg-custom-pink transition-colors flex items-center gap-2 rounded-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(e);
+                          // Optional feedback
+                          setCartFeedback(true);
+                          setTimeout(() => setCartFeedback(false), 2000);
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <circle cx="9" cy="21" r="1"></circle>
+                          <circle cx="20" cy="21" r="1"></circle>
+                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        ADD TO CART
+                      </button>
+                    )}
 
                     <button
                       className={`w-10 h-10 border border-gray-300 rounded flex items-center justify-center transition-colors ${
@@ -612,6 +712,164 @@ const CartItem = ({
           </div>
         </div>
       )}
+
+      {/* Fullscreen Zoom Modal */}
+      {showZoom && (
+        <div
+          className="fixed inset-0 bg-black z-50 flex flex-col justify-center items-center"
+          onClick={() => setShowZoom(false)}
+          style={{
+            animation: "fadeIn 0.3s ease-in-out",
+          }}
+        >
+          {/* Close button */}
+          <button
+            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+            onClick={() => setShowZoom(false)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="transition-transform duration-300 hover:scale-110"
+            >
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Main image container */}
+          <div
+            className="relative w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="flex transition-transform duration-300 ease-in-out h-full"
+              style={{
+                transform: `translateX(-${zoomSlide * 100}%)`,
+                width: "300%",
+              }}
+            >
+              <div className="w-full flex-shrink-0 flex items-center justify-center">
+                <img
+                  src={img}
+                  alt={name}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+              <div className="w-full flex-shrink-0 flex items-center justify-center">
+                <img
+                  src={hoverImg}
+                  alt={`${name} view 2`}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+              <div className="w-full flex-shrink-0 flex items-center justify-center">
+                <img
+                  src={img}
+                  alt={`${name} view 3`}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Navigation buttons */}
+            <button
+              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-70 w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-opacity-100 transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomSlide((prev) => (prev === 0 ? 2 : prev - 1));
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+
+            <button
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-70 w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-opacity-100 transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomSlide((prev) => (prev === 2 ? 0 : prev + 1));
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Thumbnail Gallery */}
+          <div className="flex gap-3 bg-black bg-opacity-50 p-3 rounded-lg absolute bottom-6">
+            <div
+              className={`border-2 ${
+                zoomSlide === 0 ? "border-white" : "border-transparent"
+              } cursor-pointer`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomSlide(0);
+              }}
+            >
+              <img src={img} alt={name} className="w-16 h-16 object-cover" />
+            </div>
+            <div
+              className={`border-2 ${
+                zoomSlide === 1 ? "border-white" : "border-transparent"
+              } cursor-pointer`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomSlide(1);
+              }}
+            >
+              <img
+                src={hoverImg}
+                alt={`${name} view 2`}
+                className="w-16 h-16 object-cover"
+              />
+            </div>
+            <div
+              className={`border-2 ${
+                zoomSlide === 2 ? "border-white" : "border-transparent"
+              } cursor-pointer`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomSlide(2);
+              }}
+            >
+              <img
+                src={img}
+                alt={`${name} view 3`}
+                className="w-16 h-16 object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -637,6 +895,7 @@ export default function Cart({ setCartCount, addToCart }) {
           originalPrice={product.originalPrice}
           addToCart={addToCart}
           index={index}
+          isOutOfStock={product.isOutOfStock} // Pass the isOutOfStock prop
         />
       ))}
     </div>

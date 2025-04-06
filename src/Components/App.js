@@ -6,14 +6,14 @@ import "../index.css";
 import Navbar from "./navbar";
 import Header from "./header";
 import Cart from "./cart";
-import Buttons from "./buttons";
 import Customer from "./customer";
 import Footer from "./footer";
 import CartPage from "./cartPage";
 import Touch from "./touch";
 import WishlistPage from "./WishlistPage";
 import ProductDetails from "./productDetails";
-import Carousel from "./ui/carousel";
+import Shop from "./shop";
+import EnhancedCarousel from "./ui/EnhancedCarousel";
 
 export default function App() {
   const [breadcrumb, setBreadcrumb] = useState("Home");
@@ -103,7 +103,6 @@ export default function App() {
         cartCount={cartCount}
         setCurrentView={setCurrentView}
       />
-      <Carousel />
 
       {notification.show && notification.position && (
         <div
@@ -126,6 +125,7 @@ export default function App() {
           }
         />
         <Route path="/contact" element={<Touch />} />
+        <Route path="/shop" element={<Shop />} />
         <Route
           path="/product/:id"
           element={<ProductDetails addToCart={addToCart} />}
@@ -134,6 +134,7 @@ export default function App() {
           path="/"
           element={
             <>
+              <EnhancedCarousel />
               <Header cartCount={cartCount} />
               <Cart setCartCount={setCartCount} addToCart={addToCart} />
               <Customer /> {/* 👈 now part of the homepage */}
@@ -143,6 +144,7 @@ export default function App() {
       </Routes>
 
       {currentView === "Home" && <Customer />}
+
       <Footer />
     </Router>
   );

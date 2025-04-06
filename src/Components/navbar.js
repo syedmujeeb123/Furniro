@@ -115,8 +115,12 @@ export default function Navbar({
         </li>
         <li className="relative group">
           <Link
-            to="/"
-            onClick={() => setBreadcrumb("Home > Shop")}
+            to="/shop"
+            onClick={() => {
+              setBreadcrumb("Home > Shop");
+              onNavClick("shop");
+              setMenuOpen(false);
+            }}
             className="inline-block relative"
           >
             Shop
