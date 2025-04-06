@@ -23,6 +23,7 @@ module.exports = {
         customGrayBorder: "#9F9F9F",
         customYellow: "#B88E2F", // You can name it anything you want
         customGray: "#9F9F9F", // Name the color as desired
+        "custom-pink": "rgb(253, 61, 181)",
       },
     },
   },

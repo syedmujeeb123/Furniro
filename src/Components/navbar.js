@@ -45,7 +45,7 @@ export default function Navbar({
       {/* Dropdown for Icons in Mobile Menu */}
       <div className="md:hidden relative z-50">
         {showIcons && (
-          <div className="absolute left-0 top-full mt-10 ml-6 shadow-md w-full flex flex-row flex-wrap gap-4 rounded-lg bg-white p-4">
+          <div className="absolute left-0 top-full mt-10 ml-6 shadow-md w-full flex flex-row flex-wrap gap-4 rounded-lg p-4">
             <Link to="/wishlist">
               <div className="flex items-center gap-1">
                 <img src={Wishlist_icon} className="w-6 h-6" alt="Wishlist" />
@@ -99,7 +99,7 @@ export default function Navbar({
           menuOpen ? "block" : "hidden"
         } md:flex z-40`}
       >
-        <li>
+        <li className="relative group">
           <Link
             to="/"
             onClick={() => {
@@ -107,21 +107,33 @@ export default function Navbar({
               onNavClick("cart");
               setMenuOpen(false);
             }}
+            className="inline-block relative"
           >
             Home
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-500 ease-in-out group-hover:w-full"></span>
           </Link>
         </li>
-        <li>
-          <Link to="/" onClick={() => setBreadcrumb("Home > Shop")}>
+        <li className="relative group">
+          <Link
+            to="/"
+            onClick={() => setBreadcrumb("Home > Shop")}
+            className="inline-block relative"
+          >
             Shop
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-500 ease-in-out group-hover:w-full"></span>
           </Link>
         </li>
-        <li>
-          <Link to="/" onClick={() => setBreadcrumb("Home > About")}>
+        <li className="relative group">
+          <Link
+            to="/"
+            onClick={() => setBreadcrumb("Home > About")}
+            className="inline-block relative"
+          >
             About
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-500 ease-in-out group-hover:w-full"></span>
           </Link>
         </li>
-        <li>
+        <li className="relative group">
           <Link
             to="/"
             onClick={() => {
@@ -129,8 +141,10 @@ export default function Navbar({
               onNavClick("contact");
               setMenuOpen(false);
             }}
+            className="inline-block relative"
           >
             Contact
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-500 ease-in-out group-hover:w-full"></span>
           </Link>
         </li>
       </ul>

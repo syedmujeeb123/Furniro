@@ -4,7 +4,6 @@ import "../index.css";
 
 // Import components
 import Navbar from "./navbar";
-import Background from "./background";
 import Header from "./header";
 import Cart from "./cart";
 import Buttons from "./buttons";
@@ -14,6 +13,7 @@ import CartPage from "./cartPage";
 import Touch from "./touch";
 import WishlistPage from "./WishlistPage";
 import ProductDetails from "./productDetails";
+import Carousel from "./ui/carousel";
 
 export default function App() {
   const [breadcrumb, setBreadcrumb] = useState("Home");
@@ -103,7 +103,7 @@ export default function App() {
         cartCount={cartCount}
         setCurrentView={setCurrentView}
       />
-      {currentView === "cart" && <Background breadcrumb={breadcrumb} />}
+      <Carousel />
 
       {notification.show && notification.position && (
         <div
